@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Camionetas {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  marca       String
+  modelo      String
+  año         Int
+  placa       String  @unique
+  color       String
+  combustible String
+  estado      String
+  kilometraje Int
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Modificaciones Modificaciones[]
+  Asignacion  Asignacion[]
+  asignado    Boolean @default(false)
+}
+
+model Modificaciones {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  camioneta   Camionetas @relation(fields: [camionetaId], references: [id])
+  usuario     Usuarios   @relation(fields: [usuarioId], references: [id])
+  camionetaId String  @db.ObjectId 
+  usuarioId   String @db.ObjectId
+  supervisor  String @db.ObjectId
+  fecha       DateTime @default(now())
+  estado      String
+}
+
+model Usuarios {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  nombre    String
+  email     String   @unique
+  password  String
+  role      String
+  fotografia String 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Modificaciones Modificaciones[]
+  Asignacion Asignacion[]
+}
+
+model Asignacion {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  camionetaId String @unique @db.ObjectId
+  usuarioId   String @db.ObjectId
+  fechaAsignacion DateTime @default(now())
+  updateAsignacion DateTime @updatedAt
+  Camionetas Camionetas @relation(fields: [camionetaId], references: [id])
+  Usuarios Usuarios @relation(fields: [usuarioId], references: [id])
+}
